@@ -1,0 +1,34 @@
+Что выведет программа? Объяснить вывод программы. Объяснить как работают defer’ы и порядок их вызовов.
+
+
+package main
+
+import (
+    "fmt"
+)
+
+func test() (x int) {
+    defer func() {
+        x++
+    }()
+    x = 1
+    return
+}
+
+
+func anotherTest() int {
+    var x int
+    defer func() {
+        x++
+    }()
+    x = 1
+    return x
+}
+
+
+func main() {
+    fmt.Println(test())
+    fmt.Println(anotherTest())
+}
+
+Вывод будет 2, 1. Первая ф-ия делает именовоный возврат, который может модифицировать ф-ия из defer

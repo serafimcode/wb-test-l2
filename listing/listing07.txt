@@ -1,0 +1,52 @@
+Что выведет программа? Объяснить вывод программы.
+
+package main
+
+import (
+    "fmt"
+    "math/rand"
+    "time"
+)
+
+func asChan(vs ...int) <-chan int {
+   c := make(chan int)
+
+   go func() {
+       for _, v := range vs {
+           c <- v
+           time.Sleep(time.Duration(rand.Intn(1000)) * time.Millisecond)
+      }
+
+      close(c)
+  }()
+  return c
+}
+
+func merge(a, b <-chan int) <-chan int {
+   c := make(chan int)
+   go func() {
+       for {
+           select {
+               case v := <-a:
+                   c <- v
+              case v := <-b:
+                   c <- v
+           }
+      }
+   }()
+ return c
+}
+
+func main() {
+
+   a := asChan(1, 3, 5, 7)
+   b := asChan(2, 4 ,6, 8)
+   c := merge(a, b )
+   for v := range c {
+       fmt.Println(v)
+   }
+}
+Вывод программы можно разделить на 2 части:
+1) Мы получим все зна-я переданные в каналы a и b но в рандомном порядке из-за рандомизации времени ожидания в asChan()
+2) В merge() у нас бесконечный цикл, нет условия выхода. Когда каналы a и b закроются, нам посыпется бесконечность нулей,
+потому что чтение из закрытого канала возвращает zeroed value
